@@ -58,6 +58,9 @@ jobs:
           print('Configured minSdk=26')
           PY
 
+      - name: Remove generated Flutter template test
+        run: rm -f test/widget_test.dart
+
       - name: Install dependencies
         run: flutter pub get
 
