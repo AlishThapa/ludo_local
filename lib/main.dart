@@ -54,7 +54,7 @@ class _LudoHomeState extends State<LudoHome> {
   Widget _menu() => Column(
         children: [
           const Spacer(),
-          const Icon(Icons.casino_rounded, color: palette[2], size: 72),
+          Icon(Icons.casino_rounded, color: palette[2], size: 72),
           const SizedBox(height: 14),
           const Text('LUDO LOCAL',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900,
@@ -252,7 +252,7 @@ class LudoBoard extends CustomPainter {
     final player = game.state.currentPlayer;
     for (final index in game.movableTokens.reversed) {
       if ((tap - position(player, game.state.tokens[player][index],
-          index, side)).distance <= side / 19) return index;
+          index, side)).distance <= side / 19) { return index; }
     }
     return null;
   }
@@ -324,8 +324,8 @@ class LudoBoard extends CustomPainter {
         final movable = p == engine.state.currentPlayer &&
             engine.movableTokens.contains(i);
         final radius = unit*.39;
-        if (movable) canvas.drawCircle(center,radius*1.5,
-            Paint()..color = palette[p].withValues(alpha: .35));
+        if (movable) { canvas.drawCircle(center,radius*1.5,
+            Paint()..color = palette[p].withValues(alpha: .35)); }
         canvas.drawCircle(center+const Offset(0,1.2),radius+1,
             Paint()..color = Colors.black26);
         canvas.drawCircle(center,radius,Paint()..color = palette[p]);
