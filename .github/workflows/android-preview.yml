@@ -1,0 +1,93 @@
+name: Android APK preview
+
+on:
+  push:
+    branches:
+      - main
+      - feature/android-preview-release
+    paths:
+      - 'lib/**'
+      - 'test/**'
+      - 'pubspec.yaml'
+      - '.github/workflows/android-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.35.7'
+          cache: true
+
+      - name: Generate Android project
+        run: flutter create --project-name ludo_local --org com.alishthapa --platforms=android .
+
+      - name: Enforce minimum Android 8.0 (API 26)
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          gradle = Path('android/app/build.gradle.kts')
+          if not gradle.exists():
+              raise SystemExit('Expected android/app/build.gradle.kts was not generated')
+          source = gradle.read_text()
+          target = 'minSdk = flutter.minSdkVersion'
+          if target not in source:
+              raise SystemExit('Unexpected Gradle template: Android minSdk could not be set safely')
+          gradle.write_text(source.replace(target, 'minSdk = 26'))
+          print('Configured minSdk=26')
+          PY
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze Dart source
+        run: flutter analyze
+
+      - name: Run game tests
+        run: flutter test
+
+      - name: Build APK (release mode, preview signing)
+        run: flutter build apk --release --target-platform android-arm,android-arm64 --split-per-abi
+
+      - name: Show APK sizes and checksums
+        run: |
+          ls -lh build/app/outputs/flutter-apk/*.apk
+          sha256sum build/app/outputs/flutter-apk/*.apk | tee build/app/outputs/flutter-apk/SHA256SUMS.txt
+
+      - name: Upload installable preview APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ludo-local-apk-preview-${{ github.run_number }}
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/flutter-apk/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Publish GitHub pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          TAG="v0.1.0-preview.${{ github.run_number }}"
+          gh release create "$TAG"             build/app/outputs/flutter-apk/*.apk             build/app/outputs/flutter-apk/SHA256SUMS.txt             --target "${{ github.sha }}"             --title "Ludo Local $TAG (test build)"             --notes "Automated offline pass-and-play Android test build from commit ${{ github.sha }}. This release has NOT been validated on physical Android 8 devices; Wi-Fi and Bluetooth multiplayer are NOT implemented. Preview APKs use development signing and must not be treated as Play Store-ready."             --prerelease
