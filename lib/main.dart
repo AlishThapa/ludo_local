@@ -471,9 +471,7 @@ class _LudoHomeState extends State<LudoHome> {
                     'P${p + 1}',
                     style: const TextStyle(fontWeight: FontWeight.w800,
                       fontSize: 11)),
-                  Text(state.tokens[p].take(engine.rules.tokensPerPlayer)
-                    .where((v) => v == 56).length.toString() +
-                    '/${engine.rules.tokensPerPlayer}',
+                  Text('${state.tokens[p].take(engine.rules.tokensPerPlayer).where((v) => v == 56).length}/${engine.rules.tokensPerPlayer}',
                     style: TextStyle(fontSize: 10,
                       color: foreground.withValues(alpha: .6))),
                 ]),
@@ -683,7 +681,7 @@ class LudoBoard extends CustomPainter {
     )..layout();
     star.paint(canvas,center.center - Offset(star.width/2,star.height/2));
     for (var p = 0; p < engine.playerCount; p++) {
-      for (var i = 0; i < 4; i++) {
+      for (var i = 0; i < engine.rules.tokensPerPlayer; i++) {
         final center = position(p,engine.state.tokens[p][i],i,side);
         final movable = p == engine.state.currentPlayer &&
             engine.movableTokens.contains(i);
