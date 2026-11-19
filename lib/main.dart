@@ -99,7 +99,7 @@ class _LudoHomeState extends State<LudoHome> {
 
   void _roll() async {
     if (!playing || rolling || bots[engine.state.currentPlayer] ||
-        engine.state.needsMove || engine.state.winner != null) return;
+        engine.state.needsMove || engine.state.winner != null) { return; }
     await _performRoll();
   }
 
@@ -134,7 +134,7 @@ class _LudoHomeState extends State<LudoHome> {
         engine.rules.autoMoveSingle && engine.movableTokens.length == 1) {
       Future<void>.delayed(const Duration(milliseconds: 350), () {
         if (!mounted || !playing || session != ticket ||
-            engine.state.winner != null || !engine.state.needsMove) return;
+            engine.state.winner != null || !engine.state.needsMove) { return; }
         _move(engine.movableTokens.first);
       });
       return;
@@ -374,7 +374,7 @@ class _LudoHomeState extends State<LudoHome> {
                             child: const Icon(Icons.person,
                               size: 16, color: Colors.white)),
                           const SizedBox(width: 8),
-                          Expanded(child: Text('Player ' + (i+1).toString(),
+                          Expanded(child: Text('Player ${i + 1}',
                             style: const TextStyle(fontWeight: FontWeight.w600))),
                           DropdownButton<int>(
                             value: colorIds[i],
@@ -407,8 +407,7 @@ class _LudoHomeState extends State<LudoHome> {
                     OutlinedButton.icon(
                       onPressed: _showRules,
                       icon: const Icon(Icons.tune_rounded),
-                      label: Text('Customize rules (' +
-                          (rules.length + 2).toString() + ' options)'),
+                      label: Text('Customize rules (${rules.length + 2} options)'),
                     ),
                     const SizedBox(height: 12),
                     FilledButton.icon(
@@ -468,13 +467,13 @@ class _LudoHomeState extends State<LudoHome> {
                 child: Column(children: [
                   Icon(bots[p] ? Icons.smart_toy_outlined : Icons.person,
                     size: 16, color: colors[p]),
-                  Text(bots[p] ? 'Bot ' + (p+1).toString() :
-                    'P' + (p+1).toString(),
+                  Text(bots[p] ? 'Bot ${p + 1}' :
+                    'P${p + 1}',
                     style: const TextStyle(fontWeight: FontWeight.w800,
                       fontSize: 11)),
                   Text(state.tokens[p].take(engine.rules.tokensPerPlayer)
                     .where((v) => v == 56).length.toString() +
-                    '/' + engine.rules.tokensPerPlayer.toString(),
+                    '/${engine.rules.tokensPerPlayer}',
                     style: TextStyle(fontSize: 10,
                       color: foreground.withValues(alpha: .6))),
                 ]),
@@ -522,8 +521,7 @@ class _LudoHomeState extends State<LudoHome> {
               duration: const Duration(milliseconds: 220),
               child: Container(
                 key: ValueKey(rolling ? 'rolling' :
-                  (state.lastRoll ?? 0).toString() +
-                  '-' + state.turnNumber.toString()),
+                  '${state.lastRoll ?? 0}-${state.turnNumber}'),
                 alignment: Alignment.center,
                 height: 60, width: 60,
                 decoration: BoxDecoration(
